@@ -10,9 +10,12 @@ ngrok tcp 22
 ####################################################################################
 
 
-sudo apt update
+sudo apt update -y
 sudo apt install -y nginx git nodejs npm
 sudo npm install -g @angular/cli
+
+
+
 #####################
 
 sudo nano /etc/nginx/sites-available/angular
@@ -29,58 +32,13 @@ server {
 }
 
 ##################################
-sudo ln -s /etc/nginx/sites-available/angular /etc/nginx/sites-enabled/
+
+sudo rm /etc/nginx/sites-enabled/default
+sudo ln -sf /etc/nginx/sites-available/angular /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 
-####################################
 
-name: Deploy to KillerKoda via Ngrok
-
-on:
-  push:
-    branches: [ "main" ]
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Angular app
-        run: npm run build -- --configuration production
-
-      - name: Deploy files
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.NGROK_HOST }}
-          port: ${{ secrets.NGROK_PORT }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          source: "dist/property-booking-app/*"
-          target: "/var/www/angular-app/"
-
-      - name: Restart Nginx
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.NGROK_HOST }}
-          port: ${{ secrets.NGROK_PORT }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            sudo systemctl restart nginx
-
-
-            ################################################################
+######################################################################
 NGROK_HOST = 0.tcp.ngrok.io
 
 NGROK_PORT = 17890
