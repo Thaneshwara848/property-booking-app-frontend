@@ -54,3 +54,7 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
 cat /root/.ssh/id_rsa (copy this to github)
 #######################################################
+
+sudo mkdir -p /var/www/angular-app
+sudo chown -R indhuarunvel1988:indhuarunvel1988 /var/www/angular-app
+###########################################################
