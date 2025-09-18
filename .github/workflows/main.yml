@@ -30,7 +30,7 @@ jobs:
           port: ${{ secrets.NGROK_PORT }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: "dist/property-booking-app/*"
+          source: "dist/property-booking-app/*/*"
           target: "/var/www/angular-app/"
 
       - name: Restart Nginx
