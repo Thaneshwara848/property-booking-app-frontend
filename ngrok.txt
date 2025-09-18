@@ -1,0 +1,96 @@
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+  && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/ngrok.list \
+  && sudo apt update \
+  && sudo apt install ngrok
+
+  ngrok config add-authtoken 1Sq8nUiBW6PmjrJLTF1RWJbzHkY_LndRpPp2iTA1sjQNbNhG
+
+
+ngrok tcp 22
+
+
+sudo apt update
+sudo apt install -y nginx git nodejs npm
+sudo npm install -g @angular/cli
+#####################
+sudo nano /etc/nginx/sites-available/angular
+server {
+    listen 80;
+    server_name _;
+    root /var/www/angular-app;
+
+    index index.html;
+    location / {
+        try_files $uri /index.html;
+    }
+}
+##################################
+sudo ln -s /etc/nginx/sites-available/angular /etc/nginx/sites-enabled/
+sudo systemctl restart nginx
+
+####################################
+
+name: Deploy to KillerKoda via Ngrok
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+
+      - name: Deploy files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.NGROK_HOST }}
+          port: ${{ secrets.NGROK_PORT }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "dist/property-booking-app/*"
+          target: "/var/www/angular-app/"
+
+      - name: Restart Nginx
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.NGROK_HOST }}
+          port: ${{ secrets.NGROK_PORT }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            sudo systemctl restart nginx
+
+
+            ################################################################
+NGROK_HOST = 0.tcp.ngrok.io
+
+NGROK_PORT = 17890
+
+EC2_USER = ubuntu (or whatever user you SSH as)
+
+EC2_KEY = your private key
+
+
+
+ssh-keygen -t rsa -b 4096 -C "github-actions" -f /root/.ssh/id_rsa
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+cat /root/.ssh/id_rsa (copy this to github)
+#######################################################
