@@ -15,17 +15,18 @@ sudo apt update
 sudo apt install -y nginx git nodejs npm
 sudo npm install -g @angular/cli
 #####################
-sudo nano /etc/nginx/sites-available/angular
 server {
     listen 80;
     server_name _;
-    root /var/www/angular-app;
+
+    root /var/www/angular-app/dist/property-booking-app/browser;
 
     index index.html;
     location / {
         try_files $uri /index.html;
     }
 }
+
 ##################################
 sudo ln -s /etc/nginx/sites-available/angular /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
